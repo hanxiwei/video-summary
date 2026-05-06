@@ -1,7 +1,7 @@
 import tiktoken
 from openai import AsyncOpenAI
 
-from app.config import OPENAI_API_KEY
+from app.config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL
 from app.summary.prompt import SYSTEM_PROMPT, CHUNK_SUMMARY_PROMPT, MERGE_PROMPT
 
 MAX_TOKENS = 7000
@@ -9,10 +9,10 @@ CHUNK_TOKENS = 5000
 
 
 class VideoSummarizer:
-    def __init__(self, model: str = "gpt-4o-mini"):
-        self.client = AsyncOpenAI(api_key=OPENAI_API_KEY)
-        self.model = model
-        self.encoder = tiktoken.encoding_for_model("gpt-4o")
+    def __init__(self, model: str | None = None):
+        self.client = AsyncOpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
+        self.model = model or DEEPSEEK_MODEL
+        self.encoder = tiktoken.get_encoding("cl100k_base")
 
     def _count_tokens(self, text: str) -> int:
         return len(self.encoder.encode(text))
