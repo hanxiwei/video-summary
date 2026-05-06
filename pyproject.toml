@@ -1,0 +1,28 @@
+[project]
+name = "video-summary"
+version = "0.1.0"
+description = "视频摘要工具：下载视频 → 提取音频 → Whisper转写 → AI摘要"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.23.0",
+    "yt-dlp>=2024.0",
+    "openai>=1.0.0",
+    "sqlalchemy>=2.0.0",
+    "aiosqlite>=0.19.0",
+    "python-dotenv>=1.0.0",
+    "jinja2>=3.1.0",
+    "python-multipart>=0.0.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.25.0",
+    "mypy>=1.8.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
