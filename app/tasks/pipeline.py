@@ -8,6 +8,7 @@ from app.db.models import VideoTask
 from app.download.downloader import VideoDownloader
 from app.audio.extractor import AudioExtractor
 from app.audio.transcriber import WhisperTranscriber
+from app.summary.summarizer import VideoSummarizer
 
 
 class SummaryPipeline:
@@ -15,6 +16,7 @@ class SummaryPipeline:
         self.downloader = VideoDownloader()
         self.extractor = AudioExtractor()
         self.transcriber = WhisperTranscriber(language="zh")
+        self.summarizer = VideoSummarizer()
 
     async def run(self, task_id: str) -> None:
         async with async_session() as db:
@@ -27,6 +29,7 @@ class SummaryPipeline:
                 await self._do_download(task, db)
                 await self._do_extract(task, db)
                 await self._do_transcribe(task, db)
+                await self._do_summarize(task, db)
                 task.status = "completed"
                 await db.commit()
             except Exception as e:
@@ -79,4 +82,15 @@ class SummaryPipeline:
 
         audio_path.unlink(missing_ok=True)
         task.audio_path = None
+        await db.commit()
+
+    async def _do_summarize(self, task: VideoTask, db: AsyncSession) -> None:
+        if not task.transcript:
+            raise RuntimeError("No transcript to summarize")
+
+        task.status = "summarizing"
+        await db.commit()
+
+        summary = await self.summarizer.summarize(task.transcript, task.title or "")
+        task.summary = summary
         await db.commit()

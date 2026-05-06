@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Video Summary - 首页{% endblock %}
+{% block content %}
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4">提交新任务</h2>
+    <form action="/tasks" method="post"
+          class="flex gap-3">
+        <input type="url" name="url" required
+               placeholder="输入视频 URL（YouTube、B站等）"
+               class="flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <button type="submit"
+                class="bg-blue-600 text-white px-5 py-2 rounded text-sm hover:bg-blue-700 transition">
+            提交
+        </button>
+    </form>
+</div>
+
+<div class="bg-white rounded-lg shadow p-6">
+    <h2 class="text-lg font-semibold mb-4">历史任务</h2>
+    <div hx-get="/partials/tasks" hx-trigger="load, every 3s"
+         hx-target="#task-list" hx-swap="innerHTML"
+         hx-indicator="#list-spinner">
+        <div id="list-spinner" class="htmx-indicator text-sm text-gray-400">加载中...</div>
+        <div id="task-list"></div>
+    </div>
+</div>
+{% endblock %}

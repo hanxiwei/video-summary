@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ task.title or "任务详情" }} - Video Summary{% endblock %}
+{% block content %}
+<div class="bg-white rounded-lg shadow p-6">
+    <h1 class="text-xl font-bold mb-4">{{ task.title or "未知视频" }}</h1>
+
+    <div class="flex gap-6 text-sm text-gray-500 mb-6">
+        {% if task.duration %}
+        <span>时长：{{ task.duration // 60 }}分{{ task.duration % 60 }}秒</span>
+        {% endif %}
+        <span>状态：<span class="font-medium">{{ task.status }}</span></span>
+        <span>创建：{{ task.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+    </div>
+
+    <div class="mb-6">
+        <h2 class="text-lg font-semibold mb-2">进度</h2>
+        <div class="grid grid-cols-4 gap-2 text-center text-xs">
+            {% set steps = [
+                ('downloaded', '下载'),
+                ('extracted', '提取'),
+                ('transcribed', '转写'),
+                ('completed', '摘要')
+            ] %}
+            {% set statuses = ['pending', 'downloading', 'downloaded', 'extracting', 'extracted', 'transcribing', 'transcribed', 'summarizing', 'completed', 'failed'] %}
+            {% for step_status, label in steps %}
+            <div class="p-2 rounded {% if step_status in statuses[:statuses.index(task.status)+1] %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-400{% endif %}">
+                {{ label }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if task.summary %}
+    <div class="mb-6">
+        <h2 class="text-lg font-semibold mb-2">摘要</h2>
+        <div id="summary-content" class="prose max-w-none p-4 bg-gray-50 rounded"></div>
+        <script>
+            document.getElementById('summary-content').innerHTML =
+                marked.parse({{ task.summary | tojson | safe }});
+        </script>
+    </div>
+    {% endif %}
+
+    {% if task.transcript %}
+    <details class="mb-6">
+        <summary class="cursor-pointer text-lg font-semibold mb-2">转录文本</summary>
+        <div class="p-4 bg-gray-50 rounded text-sm text-gray-700 max-h-96 overflow-y-auto whitespace-pre-wrap">
+            {{ task.transcript }}
+        </div>
+    </details>
+    {% endif %}
+
+    {% if task.error_message %}
+    <div class="p-3 bg-red-50 text-red-700 rounded text-sm">
+        错误：{{ task.error_message }}
+    </div>
+    {% endif %}
+
+    <a href="/" class="text-sm text-blue-600 hover:underline">返回首页</a>
+</div>
+{% endblock %}

@@ -20,6 +20,8 @@ def _to_response(task: VideoTask) -> TaskResponse:
         duration=task.duration,
         thumbnail=task.thumbnail,
         status=task.status,
+        transcript=task.transcript,
+        summary=task.summary,
         error_message=task.error_message,
         created_at=task.created_at,
         updated_at=task.updated_at,
