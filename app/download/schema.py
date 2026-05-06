@@ -13,6 +13,8 @@ class TaskResponse(BaseModel):
     duration: int | None
     thumbnail: str | None
     status: str
+    transcript: str | None = None
+    summary: str | None = None
     error_message: str | None
     created_at: datetime
     updated_at: datetime

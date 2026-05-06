@@ -38,7 +38,7 @@ async def create_task(
     await db.refresh(task)
 
     pipeline = SummaryPipeline()
-    background_tasks.add_task(pipeline.run_download, task.id)
+    background_tasks.add_task(pipeline.run, task.id)
     return _to_response(task)
 
 
