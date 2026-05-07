@@ -34,7 +34,7 @@ class SummaryPipeline:
                 await db.commit()
             except Exception as e:
                 task.status = "failed"
-                task.error_message = str(e)
+                task.error_message = str(e) or type(e).__name__
                 await db.commit()
 
     async def _do_download(self, task: VideoTask, db: AsyncSession) -> None:

@@ -1,4 +1,5 @@
 import asyncio
+import os
 from pathlib import Path
 
 
@@ -7,11 +8,15 @@ class AudioExtractor:
         self.sample_rate = sample_rate
         self.bitrate = bitrate
 
+    @staticmethod
+    def _ffmpeg() -> str:
+        return os.getenv("FFMPEG_PATH", "ffmpeg")
+
     async def extract(self, video_path: Path, output_dir: Path) -> Path:
         audio_path = output_dir / f"{video_path.stem}.mp3"
 
         cmd = [
-            "ffmpeg", "-y", "-i", str(video_path),
+            self._ffmpeg(), "-y", "-i", str(video_path),
             "-vn", "-acodec", "libmp3lame",
             "-ar", str(self.sample_rate),
             "-b:a", self.bitrate,
@@ -22,12 +27,12 @@ class AudioExtractor:
             *cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            creationflags=0x08000000 if hasattr(asyncio.subprocess, "CREATE_NO_WINDOW") else 0,
         )
-        await proc.communicate()
+        _stdout, stderr = await proc.communicate()
 
         if proc.returncode != 0:
-            raise RuntimeError(f"ffmpeg failed with code {proc.returncode}")
+            err = stderr.decode(errors="replace") if stderr else ""
+            raise RuntimeError(f"ffmpeg failed with code {proc.returncode}: {err[:500]}")
 
         if not audio_path.exists():
             raise RuntimeError(f"Audio extraction failed: {audio_path} not created")
@@ -38,7 +43,7 @@ class AudioExtractor:
         out_pattern = str(audio_path.parent / f"{audio_path.stem}_chunk_%03d{audio_path.suffix}")
 
         cmd = [
-            "ffmpeg", "-y", "-i", str(audio_path),
+            self._ffmpeg(), "-y", "-i", str(audio_path),
             "-f", "segment", "-segment_time", str(chunk_seconds),
             "-c", "copy", out_pattern,
         ]
@@ -47,7 +52,6 @@ class AudioExtractor:
             *cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            creationflags=0x08000000 if hasattr(asyncio.subprocess, "CREATE_NO_WINDOW") else 0,
         )
         await proc.communicate()
 

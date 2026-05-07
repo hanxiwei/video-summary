@@ -21,7 +21,11 @@ class VideoDownloader:
         self.output_dir = output_dir
 
     def get_info(self, url: str) -> VideoInfo:
-        opts = {"quiet": True, "no_warnings": True}
+        opts = {
+            "quiet": True,
+            "no_warnings": True,
+            "nocheckcertificate": True,
+        }
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=False)
             return VideoInfo(
@@ -42,6 +46,7 @@ class VideoDownloader:
             "merge_output_format": "mp4",
             "quiet": True,
             "no_warnings": True,
+            "nocheckcertificate": True,
             "progress_hooks": hooks,
         }
 
